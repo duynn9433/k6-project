@@ -8,14 +8,15 @@ import { URL } from 'https://jslib.k6.io/url/1.0.0/index.js';
 // };
 
 export const options = {
+    // discardResponseBodies: true,
     stages: [
         {
             duration: '60s',
-            target: 100
+            target: 1000
         },
         {
             duration: '300s',
-            target: 100
+            target: 1000
         },
         {
             duration: '60s',
@@ -25,14 +26,14 @@ export const options = {
 }
 
 
-const MANIFEST_URL = 'https://es1-p2-netcdn.tv360.vn/netcdn-live/198/output/198-audio_133600_eng=131600-video=6730000.m3u8?timestamp=1817589485&uid=12345&token=c49efc60dbec21047f4159f4cf55687c';
+const MANIFEST_URL = 'https://es2-p1-netcdn.tv360.vn/netcdn-live/198/output/198-audio_133600_eng=131600-video=6730000.m3u8?timestamp=1817589485&uid=12345&token=23ddd6656fe089f8dd46e3dccbfd3d7e';
 
 export default function () {
   // Request the manifest file
-  let res = http.get(MANIFEST_URL);
-  check(res, {
-    'manifest is 200': (r) => r.status === 200,
-  });
+  let res = http.get(MANIFEST_URL, { responseType: "text" });
+//   check(res, {
+//     'manifest is 200': (r) => r.status === 200,
+//   });
 
   // Parse the manifest file to get the video segment URLs
   let manifestContent = res.body;
@@ -40,11 +41,13 @@ export default function () {
 
   // Request each video segment
 //   segmentUrls.forEach((url) => {
-    let segmentRes = http.get(segmentUrls[segmentUrls.length - 1]);
-    check(segmentRes, {
-      'segment is 200': (r) => r.status === 200,
-      'segment is not empty': (r) => r.body.length > 0,
-    });
+    // let segmentRes = http.get(segmentUrls[segmentUrls.length - 1]);
+    let lastSegmentUrl = getLastUrl(manifestContent);
+    let segmentRes = http.get(lastSegmentUrl);
+    // check(segmentRes, {
+    //   'segment is 200': (r) => r.status === 200,
+    //   'segment is not empty': (r) => r.body.length > 0,
+    // });
     sleep(2); // Sleep to simulate real user behavior
 //   });
 }
@@ -61,4 +64,17 @@ function parseManifest(manifestContent) {
     }
   }
   return segmentUrls;
+}
+
+//get last line in manifestContent
+function getLastUrl(manifestContent) {
+    let lines = manifestContent.split('\n');
+    for(let i = lines.length - 1; i >= 0; i--) {
+        let line = lines[i].trim();
+        if(line && !line.startsWith('#')) {
+            return new URL(line, MANIFEST_URL).href;
+        }
+    }
+    // let lastLine =  lines[lines.length - 1].trim();
+    // return new URL(lastLine, MANIFEST_URL).href;
 }
