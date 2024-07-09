@@ -26,7 +26,7 @@ export const options = {
 }
 
 
-const MANIFEST_URL = 'https://es5-p2-netcdn.tv360.vn/netcdn-live/198/output/198-audio_133600_eng=131600-video=1752000.m3u8?timestamp=1817589485&uid=12345&token=93f213812321d97f5e432a436bd67282';
+const MANIFEST_URL = 'https://es5-p2-netcdn.netcdn.vn/netcdn-live/198/output/198-audio_133600_eng=131600-video=1752000.m3u8?timestamp=1817589485&uid=12345&token=2666f9e0a2cd2435aff11585ef57643a';
 export default function () {
   // Request the manifest file
   let res = http.get(MANIFEST_URL, { responseType: "text" });
